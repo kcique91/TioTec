@@ -15,10 +15,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import duoc.appmoviles.navigation.NavigationEvent
 import duoc.appmoviles.navigation.Screen
-import duoc.appmoviles.screens.HomeScreen
+import duoc.appmoviles.screens.ChecklistScreen
 import duoc.appmoviles.screens.EvaluacionScreen
+import duoc.appmoviles.screens.HomeScreen
 import duoc.appmoviles.screens.PantallaBase
 import duoc.appmoviles.ui.theme.TioTecTheme
+import duoc.appmoviles.viewmodels.ChecklistViewModel
+import duoc.appmoviles.viewmodels.EvaluacionViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -29,8 +32,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             TioTecTheme {
 
-                // ViewModel y NavController
+                // ViewModels compartidos: se crean una sola vez para toda la app
                 val viewModel: MainViewModel = viewModel()
+                val evaluacionViewModel: EvaluacionViewModel = viewModel()
+                val checklistViewModel: ChecklistViewModel = viewModel()
                 val navController = rememberNavController()
 
                 // Escucha los eventos de navegación que emite el ViewModel
@@ -67,13 +72,16 @@ class MainActivity : ComponentActivity() {
                             HomeScreen(navController = navController, viewModel = viewModel)
                         }
                         composable(route = Screen.Evaluation.route) {
-                            EvaluacionScreen(viewModel = viewModel)
+                            EvaluacionScreen(
+                                viewModel = viewModel,
+                                evaluacionViewModel = evaluacionViewModel
+                            )
                         }
                         composable(route = Screen.Checklist.route) {
-                            PantallaBase(
-                                titulo = "Checklist",
-                                descripcion = "Aquí irá el checklist de acciones preventivas.",
-                                viewModel = viewModel
+                            ChecklistScreen(
+                                viewModel = viewModel,
+                                evaluacionViewModel = evaluacionViewModel,
+                                checklistViewModel = checklistViewModel
                             )
                         }
                         composable(route = Screen.History.route) {
