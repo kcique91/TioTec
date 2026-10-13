@@ -27,9 +27,12 @@ fun ChecklistScreen(
     val estadoEvaluacion by evaluacionViewModel.estado.collectAsState()
     val acciones by checklistViewModel.acciones.collectAsState()
 
-    // Cada vez que cambian las respuestas, se recalculan las acciones
-    LaunchedEffect(estadoEvaluacion.respuestas) {
-        checklistViewModel.cargarDesdeBrechas(evaluacionViewModel.brechas())
+    // Solo cuando la evaluación está terminada se actualizan las acciones.
+    // Si no, se muestran las que ya estaban guardadas en la base de datos.
+    LaunchedEffect(estadoEvaluacion.terminada, estadoEvaluacion.respuestas) {
+        if (estadoEvaluacion.terminada) {
+            checklistViewModel.cargarDesdeBrechas(evaluacionViewModel.brechas())
+        }
     }
 
     val completadas = acciones.count { it.completada }

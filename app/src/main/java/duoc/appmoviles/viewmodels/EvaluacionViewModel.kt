@@ -1,11 +1,18 @@
 package duoc.appmoviles.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import duoc.appmoviles.data.AppDatabase
+import duoc.appmoviles.data.EvaluacionEntity
 import duoc.appmoviles.model.BancoPreguntas
 import duoc.appmoviles.model.Pregunta
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 // Estado de la pantalla de evaluación
 data class EvaluacionUiState(
@@ -14,7 +21,12 @@ data class EvaluacionUiState(
     val terminada: Boolean = false                      // true cuando respondió todas
 )
 
-class EvaluacionViewModel : ViewModel() {
+// AndroidViewModel: igual que ViewModel, pero recibe la aplicación,
+// que Room necesita para abrir la base de datos
+class EvaluacionViewModel(application: Application) : AndroidViewModel(application) {
+
+    // DAO de las evaluaciones guardadas en el teléfono
+    private val dao = AppDatabase.obtener(application).evaluacionDao()
 
     val preguntas: List<Pregunta> = BancoPreguntas.preguntas
 
@@ -23,6 +35,10 @@ class EvaluacionViewModel : ViewModel() {
 
     // Versión de solo lectura para la pantalla
     val estado: StateFlow<EvaluacionUiState> = _estado.asStateFlow()
+
+    // Historial guardado en la base de datos (se actualiza solo)
+    val historial: StateFlow<List<EvaluacionEntity>> = dao.obtenerTodas()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Guarda la respuesta de la pregunta actual y avanza a la siguiente
     fun responder(cumple: Boolean) {
@@ -35,6 +51,22 @@ class EvaluacionViewModel : ViewModel() {
             indice = if (esUltima) actual.indice else actual.indice + 1,
             terminada = esUltima
         )
+
+        // Al terminar, se guarda el resultado en la base de datos
+        if (esUltima) guardarEnHistorial()
+    }
+
+    // Inserta una fila en la tabla de evaluaciones
+    private fun guardarEnHistorial() {
+        viewModelScope.launch {
+            dao.insertar(
+                EvaluacionEntity(
+                    fecha = System.currentTimeMillis(),
+                    puntaje = puntaje(),
+                    brechas = brechas().size
+                )
+            )
+        }
     }
 
     // Vuelve a empezar la evaluación

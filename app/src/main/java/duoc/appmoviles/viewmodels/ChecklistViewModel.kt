@@ -1,39 +1,63 @@
 package duoc.appmoviles.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import duoc.appmoviles.data.AccionEntity
+import duoc.appmoviles.data.AppDatabase
 import duoc.appmoviles.model.Accion
+import duoc.appmoviles.model.Categoria
 import duoc.appmoviles.model.Pregunta
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class ChecklistViewModel : ViewModel() {
+class ChecklistViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Lista privada de acciones: solo el ViewModel puede cambiarla
-    private val _acciones = MutableStateFlow<List<Accion>>(emptyList())
+    // DAO de las acciones guardadas en el teléfono
+    private val dao = AppDatabase.obtener(application).accionDao()
 
-    // Versión de solo lectura para la pantalla
-    val acciones: StateFlow<List<Accion>> = _acciones.asStateFlow()
+    // Acciones guardadas en la base de datos. Cada fila (AccionEntity)
+    // se convierte en una Accion, que es la que usa la pantalla.
+    val acciones: StateFlow<List<Accion>> = dao.obtenerTodas()
+        .map { filas ->
+            filas.map {
+                Accion(
+                    id = it.id,
+                    categoria = Categoria.valueOf(it.categoria),
+                    texto = it.texto,
+                    completada = it.completada
+                )
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Convierte las brechas de la evaluación en acciones del checklist.
+    // Convierte las brechas de la evaluación en acciones y las guarda.
     // Si una acción ya existía, conserva su estado (pendiente o completada).
     fun cargarDesdeBrechas(brechas: List<Pregunta>) {
-        val actuales = _acciones.value
-        _acciones.value = brechas.map { pregunta ->
-            val existente = actuales.find { it.id == pregunta.id }
-            Accion(
-                id = pregunta.id,
-                categoria = pregunta.categoria,
-                texto = pregunta.recomendacion,
-                completada = existente?.completada ?: false
-            )
+        viewModelScope.launch {
+            val actuales = dao.obtenerTodas().first()
+            val nuevas = brechas.map { pregunta ->
+                AccionEntity(
+                    id = pregunta.id,
+                    categoria = pregunta.categoria.name,
+                    texto = pregunta.recomendacion,
+                    completada = actuales.find { it.id == pregunta.id }?.completada ?: false
+                )
+            }
+            dao.insertarTodas(nuevas)
+            dao.borrarExcepto(nuevas.map { it.id })
         }
     }
 
     // Cambia una acción de pendiente a completada, o al revés
     fun alternar(id: Int) {
-        _acciones.value = _acciones.value.map { accion ->
-            if (accion.id == id) accion.copy(completada = !accion.completada) else accion
+        viewModelScope.launch {
+            val accion = acciones.value.find { it.id == id } ?: return@launch
+            dao.actualizarEstado(id, !accion.completada)
         }
     }
 }
