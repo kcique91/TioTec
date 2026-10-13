@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import duoc.appmoviles.navigation.NavigationEvent
 import duoc.appmoviles.navigation.Screen
 import duoc.appmoviles.screens.HomeScreen
+import duoc.appmoviles.screens.EvaluacionScreen
 import duoc.appmoviles.screens.PantallaBase
 import duoc.appmoviles.ui.theme.TioTecTheme
 import duoc.appmoviles.viewmodels.MainViewModel
@@ -66,11 +67,7 @@ class MainActivity : ComponentActivity() {
                             HomeScreen(navController = navController, viewModel = viewModel)
                         }
                         composable(route = Screen.Evaluation.route) {
-                            PantallaBase(
-                                titulo = "Evaluación",
-                                descripcion = "Aquí irá la evaluación de seguridad digital.",
-                                viewModel = viewModel
-                            )
+                            EvaluacionScreen(viewModel = viewModel)
                         }
                         composable(route = Screen.Checklist.route) {
                             PantallaBase(
