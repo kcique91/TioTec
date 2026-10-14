@@ -20,6 +20,7 @@ import duoc.appmoviles.screens.EvaluacionScreen
 import duoc.appmoviles.screens.HomeScreen
 import duoc.appmoviles.screens.HistorialScreen
 import duoc.appmoviles.screens.PantallaBase
+import duoc.appmoviles.screens.PerfilScreen
 import duoc.appmoviles.ui.theme.TioTecTheme
 import duoc.appmoviles.viewmodels.ChecklistViewModel
 import duoc.appmoviles.viewmodels.EvaluacionViewModel
@@ -92,11 +93,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(route = Screen.Profile.route) {
-                            PantallaBase(
-                                titulo = "Perfil",
-                                descripcion = "Aquí irá el perfil ficticio y los dispositivos de prueba.",
-                                viewModel = viewModel
-                            )
+                            PerfilScreen(viewModel = viewModel)
                         }
                     }
                 }

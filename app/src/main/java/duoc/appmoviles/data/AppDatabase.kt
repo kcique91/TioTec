@@ -6,14 +6,21 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [EvaluacionEntity::class, AccionEntity::class],
-    version = 1,
+    entities = [
+        EvaluacionEntity::class,
+        AccionEntity::class,
+        PerfilEntity::class,
+        DispositivoEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun evaluacionDao(): EvaluacionDao
     abstract fun accionDao(): AccionDao
+    abstract fun perfilDao(): PerfilDao
+    abstract fun dispositivoDao(): DispositivoDao
 
     companion object {
         // Guarda la única instancia de la base de datos
@@ -27,7 +34,11 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "tiotec.db"
-                ).build().also { instancia = it }
+                )
+                    // Si cambia la versión, borra y recrea las tablas (datos de prueba)
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build()
+                    .also { instancia = it }
             }
         }
     }
