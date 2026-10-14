@@ -18,6 +18,7 @@ import duoc.appmoviles.navigation.Screen
 import duoc.appmoviles.screens.ChecklistScreen
 import duoc.appmoviles.screens.EvaluacionScreen
 import duoc.appmoviles.screens.HomeScreen
+import duoc.appmoviles.screens.HistorialScreen
 import duoc.appmoviles.screens.PantallaBase
 import duoc.appmoviles.ui.theme.TioTecTheme
 import duoc.appmoviles.viewmodels.ChecklistViewModel
@@ -85,10 +86,9 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(route = Screen.History.route) {
-                            PantallaBase(
-                                titulo = "Historial",
-                                descripcion = "Aquí irá el historial de evaluaciones y acciones.",
-                                viewModel = viewModel
+                            HistorialScreen(
+                                viewModel = viewModel,
+                                evaluacionViewModel = evaluacionViewModel
                             )
                         }
                         composable(route = Screen.Profile.route) {
