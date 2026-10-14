@@ -26,6 +26,7 @@ import duoc.appmoviles.viewmodels.ChecklistViewModel
 import duoc.appmoviles.viewmodels.EvaluacionViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
 import duoc.appmoviles.screens.ConsejosScreen
+import duoc.appmoviles.screens.SolicitudesScreen
 import duoc.appmoviles.viewmodels.ConsejosViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -103,6 +104,9 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 consejosViewModel = consejosViewModel
                             )
+                        }
+                        composable(route = Screen.Solicitudes.route) {
+                            SolicitudesScreen(viewModel = viewModel)
                         }
                     }
                 }

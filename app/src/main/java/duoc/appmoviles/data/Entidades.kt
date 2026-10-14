@@ -36,3 +36,15 @@ data class DispositivoEntity(
     val nombre: String,   // por ejemplo "Celular de prueba"
     val sistema: String   // por ejemplo "Android 14"
 )
+
+
+
+// Tabla de solicitudes de asistencia simuladas: una fila por solicitud
+@Entity(tableName = "solicitudes")
+data class SolicitudEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val categoria: String,     // Respaldos, Actualizaciones, Autenticación o Recuperación
+    val descripcion: String,   // lo que escribe el usuario
+    val estado: String,        // Pendiente, En revisión o Resuelta
+    val fecha: Long            // momento en que se creó, en milisegundos
+)

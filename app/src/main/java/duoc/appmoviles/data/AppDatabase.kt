@@ -10,9 +10,10 @@ import androidx.room.RoomDatabase
         EvaluacionEntity::class,
         AccionEntity::class,
         PerfilEntity::class,
-        DispositivoEntity::class
+        DispositivoEntity::class,
+        SolicitudEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -21,6 +22,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun accionDao(): AccionDao
     abstract fun perfilDao(): PerfilDao
     abstract fun dispositivoDao(): DispositivoDao
+
+    abstract fun solicitudDao(): SolicitudDao
 
     companion object {
         // Guarda la única instancia de la base de datos

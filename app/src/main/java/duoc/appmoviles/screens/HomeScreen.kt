@@ -31,7 +31,8 @@ fun HomeScreen(
         "Checklist" to Screen.Checklist,
         "Historial" to Screen.History,
         "Perfil" to Screen.Profile,
-        "Consejos" to Screen.Consejos
+        "Consejos" to Screen.Consejos,
+        "Solicitudes" to Screen.Solicitudes
 
     )
 

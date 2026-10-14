@@ -69,3 +69,24 @@ interface DispositivoDao {
     @Query("DELETE FROM dispositivos WHERE id = :id")
     suspend fun eliminar(id: Int)
 }
+
+
+@Dao
+interface SolicitudDao {
+
+    // Todas las solicitudes, de la más nueva a la más antigua
+    @Query("SELECT * FROM solicitudes ORDER BY id DESC")
+    fun obtenerTodas(): Flow<List<SolicitudEntity>>
+
+    // Registra una solicitud nueva
+    @Insert
+    suspend fun insertar(solicitud: SolicitudEntity)
+
+    // Cambia el estado de una solicitud
+    @Query("UPDATE solicitudes SET estado = :estado WHERE id = :id")
+    suspend fun actualizarEstado(id: Int, estado: String)
+
+    // Elimina una solicitud
+    @Query("DELETE FROM solicitudes WHERE id = :id")
+    suspend fun eliminar(id: Int)
+}
