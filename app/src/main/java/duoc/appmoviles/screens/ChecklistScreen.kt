@@ -1,5 +1,10 @@
 package duoc.appmoviles.screens
 
+import android.Manifest
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,10 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import duoc.appmoviles.navigation.Screen
+import duoc.appmoviles.notifications.Recordatorios
 import duoc.appmoviles.viewmodels.ChecklistViewModel
 import duoc.appmoviles.viewmodels.EvaluacionViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
@@ -26,12 +33,25 @@ fun ChecklistScreen(
 ) {
     val estadoEvaluacion by evaluacionViewModel.estado.collectAsState()
     val acciones by checklistViewModel.acciones.collectAsState()
+    val context = LocalContext.current
 
     // Solo cuando la evaluación está terminada se actualizan las acciones.
     // Si no, se muestran las que ya estaban guardadas en la base de datos.
     LaunchedEffect(estadoEvaluacion.terminada, estadoEvaluacion.respuestas) {
         if (estadoEvaluacion.terminada) {
             checklistViewModel.cargarDesdeBrechas(evaluacionViewModel.brechas())
+        }
+    }
+
+    // Ventana que le pide permiso al usuario para enviar notificaciones
+    val pedirPermiso = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            Recordatorios.programar(context, 1)
+            Toast.makeText(context, "Recordatorio programado para dentro de 1 minuto", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Sin permiso no se pueden enviar recordatorios", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -89,7 +109,24 @@ fun ChecklistScreen(
                     progress = { completadas.toFloat() / acciones.size },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Botón que programa el recordatorio
+                OutlinedButton(
+                    onClick = {
+                        if (Recordatorios.tienePermiso(context)) {
+                            // Ya tiene permiso: se programa directamente
+                            Recordatorios.programar(context, 1)
+                            Toast.makeText(context, "Recordatorio programado para dentro de 1 minuto", Toast.LENGTH_SHORT).show()
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            // Sin permiso: se le pide al usuario
+                            pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Recordarme en 1 minuto") }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(acciones) { accion ->
