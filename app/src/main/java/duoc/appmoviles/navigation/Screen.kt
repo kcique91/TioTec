@@ -17,5 +17,9 @@ sealed class Screen(val route: String) {
 
     // Perfil ficticio y dispositivos de prueba
     data object Profile : Screen("profile_page")
+
+
+    // Consejos de seguridad que llegan desde la API
+    data object Consejos : Screen("consejos_page")
 }
 

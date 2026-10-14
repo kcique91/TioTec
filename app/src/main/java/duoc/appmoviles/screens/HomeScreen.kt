@@ -30,7 +30,9 @@ fun HomeScreen(
         "Evaluación" to Screen.Evaluation,
         "Checklist" to Screen.Checklist,
         "Historial" to Screen.History,
-        "Perfil" to Screen.Profile
+        "Perfil" to Screen.Profile,
+        "Consejos" to Screen.Consejos
+
     )
 
     ModalNavigationDrawer(

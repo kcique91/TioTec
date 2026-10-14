@@ -25,6 +25,8 @@ import duoc.appmoviles.ui.theme.TioTecTheme
 import duoc.appmoviles.viewmodels.ChecklistViewModel
 import duoc.appmoviles.viewmodels.EvaluacionViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
+import duoc.appmoviles.screens.ConsejosScreen
+import duoc.appmoviles.viewmodels.ConsejosViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 val viewModel: MainViewModel = viewModel()
                 val evaluacionViewModel: EvaluacionViewModel = viewModel()
                 val checklistViewModel: ChecklistViewModel = viewModel()
+                val consejosViewModel: ConsejosViewModel = viewModel()
                 val navController = rememberNavController()
 
                 // Escucha los eventos de navegación que emite el ViewModel
@@ -94,6 +97,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = Screen.Profile.route) {
                             PerfilScreen(viewModel = viewModel)
+                        }
+                        composable(route = Screen.Consejos.route) {
+                            ConsejosScreen(
+                                viewModel = viewModel,
+                                consejosViewModel = consejosViewModel
+                            )
                         }
                     }
                 }
