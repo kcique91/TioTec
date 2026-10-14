@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "categoria": "Respaldos",
+    "titulo": "Sigue la regla 3-2-1",
+    "texto": "Guarda 3 copias de tus archivos importantes, en 2 tipos de medios distintos y 1 copia fuera de tu casa u oficina."
+  },
+  {
+    "id": 2,
+    "categoria": "Respaldos",
+    "titulo": "Prueba tus respaldos",
+    "texto": "Un respaldo que nunca has abierto puede estar dañado. Restaura un archivo de prueba cada cierto tiempo."
+  },
+  {
+    "id": 3,
+    "categoria": "Actualizaciones",
+    "titulo": "Activa las actualizaciones automáticas",
+    "texto": "Las actualizaciones corrigen fallas de seguridad que los atacantes ya conocen. Déjalas en modo automático."
+  },
+  {
+    "id": 4,
+    "categoria": "Actualizaciones",
+    "titulo": "Elimina lo que ya no usas",
+    "texto": "Las apps y programas viejos que no se actualizan son una puerta abierta. Desinstala lo que no necesitas."
+  },
+  {
+    "id": 5,
+    "categoria": "Autenticación",
+    "titulo": "Usa una contraseña distinta en cada cuenta",
+    "texto": "Si repites contraseñas, una filtración en un sitio compromete todas tus cuentas. Un gestor de contraseñas te ayuda a recordarlas."
+  },
+  {
+    "id": 6,
+    "categoria": "Autenticación",
+    "titulo": "Activa la verificación en dos pasos",
+    "texto": "Aunque alguien robe tu contraseña, no podrá entrar sin el segundo código. Actívala primero en tu correo y tus redes."
+  },
+  {
+    "id": 7,
+    "categoria": "Recuperación de cuentas",
+    "titulo": "Mantén al día tu correo de recuperación",
+    "texto": "Revisa que tu correo y tu teléfono de recuperación sean válidos y que solo tú tengas acceso a ellos."
+  },
+  {
+    "id": 8,
+    "categoria": "Recuperación de cuentas",
+    "titulo": "Guarda tus códigos de respaldo",
+    "texto": "Al activar la verificación en dos pasos te dan códigos de emergencia. Guárdalos en un lugar seguro, fuera del teléfono."
+  }
+]
