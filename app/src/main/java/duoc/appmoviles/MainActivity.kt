@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
+import duoc.appmoviles.screens.BarraInferior
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -48,6 +51,18 @@ class MainActivity : ComponentActivity() {
                 val usuarioViewModel: UsuarioViewModel = viewModel()
                 val navController = rememberNavController()
 
+                // Ruta de la pantalla que se está mostrando (para marcar la opción activa)
+                val entradaActual by navController.currentBackStackEntryAsState()
+                val rutaActual = entradaActual?.destination?.route
+
+                // Pantallas donde se muestra la barra inferior
+                val rutasConBarra = listOf(
+                    Screen.Home.route,
+                    Screen.Checklist.route,
+                    Screen.History.route,
+                    Screen.Profile.route
+                )
+
                 // Escucha los eventos de navegación que emite el ViewModel
                 LaunchedEffect(key1 = Unit) {
                     viewModel.navigationEvents.collectLatest { event ->
@@ -71,7 +86,13 @@ class MainActivity : ComponentActivity() {
 
                 // Estructura base con el NavHost
                 Scaffold(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        // La barra solo aparece en las pantallas principales
+                        if (rutaActual in rutasConBarra) {
+                            BarraInferior(rutaActual = rutaActual, viewModel = viewModel)
+                        }
+                    }
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
