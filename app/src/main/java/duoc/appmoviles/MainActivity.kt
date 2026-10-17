@@ -27,6 +27,9 @@ import duoc.appmoviles.viewmodels.EvaluacionViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
 import duoc.appmoviles.screens.ConsejosScreen
 import duoc.appmoviles.screens.SolicitudesScreen
+import duoc.appmoviles.screens.RegistroScreen
+import duoc.appmoviles.screens.ResumenScreen
+import duoc.appmoviles.viewmodels.UsuarioViewModel
 import duoc.appmoviles.viewmodels.ConsejosViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -42,6 +45,7 @@ class MainActivity : ComponentActivity() {
                 val evaluacionViewModel: EvaluacionViewModel = viewModel()
                 val checklistViewModel: ChecklistViewModel = viewModel()
                 val consejosViewModel: ConsejosViewModel = viewModel()
+                val usuarioViewModel: UsuarioViewModel = viewModel()
                 val navController = rememberNavController()
 
                 // Escucha los eventos de navegación que emite el ViewModel
@@ -107,6 +111,18 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = Screen.Solicitudes.route) {
                             SolicitudesScreen(viewModel = viewModel)
+                        }
+                        composable(route = Screen.Registro.route) {
+                            RegistroScreen(
+                                viewModel = viewModel,
+                                usuarioViewModel = usuarioViewModel
+                            )
+                        }
+                        composable(route = Screen.Resumen.route) {
+                            ResumenScreen(
+                                viewModel = viewModel,
+                                usuarioViewModel = usuarioViewModel
+                            )
                         }
                     }
                 }
