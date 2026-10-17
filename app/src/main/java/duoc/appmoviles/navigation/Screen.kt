@@ -23,5 +23,11 @@ sealed class Screen(val route: String) {
 
     // Solicitudes de asistencia simuladas
     data object Solicitudes : Screen("solicitudes_page")
+
+    // Registro de perfil ficticio (Guía 11)
+    data object Registro : Screen("registro_page")
+
+    // Resumen de los datos registrados
+    data object Resumen : Screen("resumen_page")
 }
 

@@ -32,7 +32,8 @@ fun HomeScreen(
         "Historial" to Screen.History,
         "Perfil" to Screen.Profile,
         "Consejos" to Screen.Consejos,
-        "Solicitudes" to Screen.Solicitudes
+        "Solicitudes" to Screen.Solicitudes,
+        "Registro" to Screen.Registro
 
     )
 
