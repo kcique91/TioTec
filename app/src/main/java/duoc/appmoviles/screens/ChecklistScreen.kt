@@ -5,6 +5,9 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -100,13 +103,19 @@ fun ChecklistScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
+                // Progreso animado: la barra avanza suavemente en vez de saltar
+                val progresoAnimado by animateFloatAsState(
+                    targetValue = completadas.toFloat() / acciones.size,
+                    animationSpec = tween(durationMillis = 500),
+                    label = "progreso"
+                )
                 Text(
                     text = "Completadas: $completadas de ${acciones.size}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
-                    progress = { completadas.toFloat() / acciones.size },
+                    progress = {progresoAnimado },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -130,7 +139,20 @@ fun ChecklistScreen(
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(acciones) { accion ->
-                        Card(modifier = Modifier.fillMaxWidth()) {
+                        // Color animado: cambia suavemente cuando la acción se completa
+                        val colorTarjeta by animateColorAsState(
+                            targetValue = if (accion.completada)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant,
+                            animationSpec = tween(durationMillis = 500),
+                            label = "colorTarjeta"
+                        )
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colorTarjeta)
+                        ) {
                             Row(
                                 modifier = Modifier.padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
