@@ -5,6 +5,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,6 +60,13 @@ fun RegistroScreen(
                 value = estado.nombre,
                 onValueChange = usuarioViewModel::onNombreChange,
                 label = { Text("Nombre") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                trailingIcon = {
+                    if (estado.errores.nombre != null) {
+                        Icon(Icons.Default.Warning, contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error)
+                    }
+                },
                 isError = estado.errores.nombre != null,
                 supportingText = {
                     estado.errores.nombre?.let {
@@ -69,6 +81,13 @@ fun RegistroScreen(
                 value = estado.correo,
                 onValueChange = usuarioViewModel::onCorreoChange,
                 label = { Text("Correo electrónico") },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                trailingIcon = {
+                    if (estado.errores.correo != null) {
+                        Icon(Icons.Default.Warning, contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error)
+                    }
+                },
                 isError = estado.errores.correo != null,
                 supportingText = {
                     estado.errores.correo?.let {
@@ -83,6 +102,13 @@ fun RegistroScreen(
                 value = estado.clave,
                 onValueChange = usuarioViewModel::onClaveChange,
                 label = { Text("Contraseña") },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                trailingIcon = {
+                    if (estado.errores.clave != null) {
+                        Icon(Icons.Default.Warning, contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error)
+                    }
+                },
                 visualTransformation = PasswordVisualTransformation(),
                 isError = estado.errores.clave != null,
                 supportingText = {
@@ -98,6 +124,13 @@ fun RegistroScreen(
                 value = estado.direccion,
                 onValueChange = usuarioViewModel::onDireccionChange,
                 label = { Text("Dirección") },
+                leadingIcon = { Icon(Icons.Default.Home, contentDescription = null) },
+                trailingIcon = {
+                    if (estado.errores.direccion != null) {
+                        Icon(Icons.Default.Warning, contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error)
+                    }
+                },
                 isError = estado.errores.direccion != null,
                 supportingText = {
                     estado.errores.direccion?.let {
