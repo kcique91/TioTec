@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,9 +30,8 @@ fun SolicitudesScreen(
     // Solicitudes guardadas en la base de datos (se actualizan solas)
     val solicitudes by solicitudesViewModel.solicitudes.collectAsState()
 
-    // Lo que el usuario escribe en el formulario
-    var categoria by remember { mutableStateOf("Respaldos") }
-    var descripcion by remember { mutableStateOf("") }
+    // Estado del formulario (categoría, descripción y error) vive en el ViewModel
+    val form by solicitudesViewModel.form.collectAsState()
 
     val categorias = listOf("Respaldos", "Actualizaciones", "Autenticación", "Recuperación")
 
@@ -78,26 +79,35 @@ fun SolicitudesScreen(
                 ) {
                     categorias.forEach { opcion ->
                         FilterChip(
-                            selected = categoria == opcion,
-                            onClick = { categoria = opcion },
+                            selected = form.categoria == opcion,
+                            onClick = { solicitudesViewModel.onCategoriaChange(opcion) },
                             label = { Text(opcion) }
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = descripcion,
-                    onValueChange = { descripcion = it },
+                    value = form.descripcion,
+                    onValueChange = solicitudesViewModel::onDescripcionChange,
                     label = { Text("Describe tu problema") },
+                    leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                    trailingIcon = {
+                        if (form.errorDescripcion != null) {
+                            Icon(Icons.Default.Warning, contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    isError = form.errorDescripcion != null,
+                    supportingText = {
+                        form.errorDescripcion?.let {
+                            Text(text = it, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = {
-                        solicitudesViewModel.crearSolicitud(categoria, descripcion)
-                        descripcion = ""
-                    },
-                    enabled = descripcion.isNotBlank(),
+                    onClick = { solicitudesViewModel.crearSolicitud() },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Enviar solicitud") }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -142,4 +152,4 @@ fun SolicitudesScreen(
             }
         }
     }
-}
+}

@@ -10,6 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,14 +37,9 @@ fun PerfilScreen(
     val perfil by perfilViewModel.perfil.collectAsState()
     val dispositivos by perfilViewModel.dispositivos.collectAsState()
 
-    // Lo que el usuario escribe en el formulario del perfil.
-    // Se rellena con el perfil guardado cuando existe.
-    var nombre by remember(perfil) { mutableStateOf(perfil?.nombre ?: "") }
-    var nivel by remember(perfil) { mutableStateOf(perfil?.nivel ?: "Básico") }
-
-    // Lo que el usuario escribe en el formulario de dispositivos
-    var nombreDispositivo by remember { mutableStateOf("") }
-    var sistemaDispositivo by remember { mutableStateOf("") }
+    // Estado de los formularios (lo que se escribe y sus errores) vive en el ViewModel
+    val formPerfil by perfilViewModel.formPerfil.collectAsState()
+    val formDispositivo by perfilViewModel.formDispositivo.collectAsState()
 
     val niveles = listOf("Básico", "Intermedio", "Avanzado")
 
@@ -141,9 +140,22 @@ fun PerfilScreen(
                 Text("Usa datos inventados. No escribas datos personales reales.")
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
+                    value = formPerfil.nombre,
+                    onValueChange = perfilViewModel::onNombrePerfilChange,
                     label = { Text("Nombre del perfil") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    trailingIcon = {
+                        if (formPerfil.errorNombre != null) {
+                            Icon(Icons.Default.Warning, contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    isError = formPerfil.errorNombre != null,
+                    supportingText = {
+                        formPerfil.errorNombre?.let {
+                            Text(text = it, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -152,16 +164,20 @@ fun PerfilScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     niveles.forEach { opcion ->
                         FilterChip(
-                            selected = nivel == opcion,
-                            onClick = { nivel = opcion },
+                            selected = formPerfil.nivel == opcion,
+                            onClick = { perfilViewModel.onNivelChange(opcion) },
                             label = { Text(opcion) }
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { perfilViewModel.guardarPerfil(nombre, nivel) },
-                    enabled = nombre.isNotBlank(),
+                    onClick = {
+                        // El ViewModel valida; si hay error, el campo lo muestra
+                        if (perfilViewModel.guardarPerfil()) {
+                            Toast.makeText(context, "Perfil guardado", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Guardar perfil") }
                 if (perfil != null) {
@@ -179,28 +195,49 @@ fun PerfilScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = nombreDispositivo,
-                    onValueChange = { nombreDispositivo = it },
+                    value = formDispositivo.nombre,
+                    onValueChange = perfilViewModel::onNombreDispositivoChange,
                     label = { Text("Nombre del dispositivo") },
+                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                    trailingIcon = {
+                        if (formDispositivo.errorNombre != null) {
+                            Icon(Icons.Default.Warning, contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    isError = formDispositivo.errorNombre != null,
+                    supportingText = {
+                        formDispositivo.errorNombre?.let {
+                            Text(text = it, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = sistemaDispositivo,
-                    onValueChange = { sistemaDispositivo = it },
+                    value = formDispositivo.sistema,
+                    onValueChange = perfilViewModel::onSistemaDispositivoChange,
                     label = { Text("Sistema operativo (ej: Android 14)") },
+                    leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    trailingIcon = {
+                        if (formDispositivo.errorSistema != null) {
+                            Icon(Icons.Default.Warning, contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    isError = formDispositivo.errorSistema != null,
+                    supportingText = {
+                        formDispositivo.errorSistema?.let {
+                            Text(text = it, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = {
-                        perfilViewModel.agregarDispositivo(nombreDispositivo, sistemaDispositivo)
-                        nombreDispositivo = ""
-                        sistemaDispositivo = ""
-                    },
-                    enabled = nombreDispositivo.isNotBlank() && sistemaDispositivo.isNotBlank(),
+                    onClick = { perfilViewModel.agregarDispositivo() },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Agregar dispositivo") }
             }
@@ -234,4 +271,4 @@ fun PerfilScreen(
             }
         }
     }
-}
+}

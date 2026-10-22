@@ -8,12 +8,16 @@ import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.data.AppDatabase
 import duoc.appmoviles.data.DispositivoEntity
 import duoc.appmoviles.data.PerfilEntity
+import duoc.appmoviles.model.DispositivoFormState
+import duoc.appmoviles.model.PerfilFormState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -101,22 +105,77 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         return ultima?.let { Uri.fromFile(it) }
     }
 
-    // ----- Perfil y dispositivos -----
+    // ----- Formularios de perfil y dispositivo (estado y validación) -----
 
-    // Crea o actualiza el perfil ficticio
-    fun guardarPerfil(nombre: String, nivel: String) {
+    // Estado del formulario del perfil: privado para modificar, público solo lectura
+    private val _formPerfil = MutableStateFlow(PerfilFormState())
+    val formPerfil: StateFlow<PerfilFormState> = _formPerfil.asStateFlow()
+
+    // Estado del formulario de dispositivos
+    private val _formDispositivo = MutableStateFlow(DispositivoFormState())
+    val formDispositivo: StateFlow<DispositivoFormState> = _formDispositivo.asStateFlow()
+
+    init {
+        // Si ya hay un perfil guardado, se rellena el formulario con sus datos
         viewModelScope.launch {
-            perfilDao.guardar(PerfilEntity(nombre = nombre.trim(), nivel = nivel))
+            perfilDao.obtener().first()?.let { guardado ->
+                _formPerfil.update { it.copy(nombre = guardado.nombre, nivel = guardado.nivel) }
+            }
         }
     }
 
-    // Registra un dispositivo de prueba
-    fun agregarDispositivo(nombre: String, sistema: String) {
+    // Actualiza el nombre del perfil y limpia su error
+    fun onNombrePerfilChange(valor: String) {
+        _formPerfil.update { it.copy(nombre = valor, errorNombre = null) }
+    }
+
+    // Actualiza el nivel de experiencia elegido
+    fun onNivelChange(valor: String) {
+        _formPerfil.update { it.copy(nivel = valor) }
+    }
+
+    // Actualiza el nombre del dispositivo y limpia su error
+    fun onNombreDispositivoChange(valor: String) {
+        _formDispositivo.update { it.copy(nombre = valor, errorNombre = null) }
+    }
+
+    // Actualiza el sistema operativo y limpia su error
+    fun onSistemaDispositivoChange(valor: String) {
+        _formDispositivo.update { it.copy(sistema = valor, errorSistema = null) }
+    }
+
+    // Valida el perfil; si está correcto lo guarda en Room. Devuelve true si se guardó
+    fun guardarPerfil(): Boolean {
+        val form = _formPerfil.value
+        val error = when {
+            form.nombre.isBlank() -> "Campo obligatorio"
+            form.nombre.trim().length < 3 -> "Debe tener al menos 3 caracteres"
+            else -> null
+        }
+        _formPerfil.update { it.copy(errorNombre = error) }
+        if (error != null) return false
+
+        viewModelScope.launch {
+            perfilDao.guardar(PerfilEntity(nombre = form.nombre.trim(), nivel = form.nivel))
+        }
+        return true
+    }
+
+    // Valida el dispositivo; si está correcto lo guarda y limpia el formulario
+    fun agregarDispositivo(): Boolean {
+        val form = _formDispositivo.value
+        val errorNombre = if (form.nombre.isBlank()) "Campo obligatorio" else null
+        val errorSistema = if (form.sistema.isBlank()) "Campo obligatorio" else null
+        _formDispositivo.update { it.copy(errorNombre = errorNombre, errorSistema = errorSistema) }
+        if (errorNombre != null || errorSistema != null) return false
+
         viewModelScope.launch {
             dispositivoDao.insertar(
-                DispositivoEntity(nombre = nombre.trim(), sistema = sistema.trim())
+                DispositivoEntity(nombre = form.nombre.trim(), sistema = form.sistema.trim())
             )
         }
+        _formDispositivo.value = DispositivoFormState()
+        return true
     }
 
     // Elimina un dispositivo
