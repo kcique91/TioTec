@@ -1,5 +1,10 @@
 package duoc.appmoviles.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,9 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import duoc.appmoviles.components.ImagenInteligente
 import duoc.appmoviles.viewmodels.MainViewModel
 import duoc.appmoviles.viewmodels.PerfilViewModel
 
@@ -35,6 +43,35 @@ fun PerfilScreen(
     var sistemaDispositivo by remember { mutableStateOf("") }
 
     val niveles = listOf("Básico", "Intermedio", "Avanzado")
+
+    // ----- Cámara y galería -----
+    val context = LocalContext.current
+    val fotoUri by perfilViewModel.fotoUri.collectAsState()
+
+    // Abre la cámara del sistema; el resultado (true/false) va al ViewModel
+    val camaraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { exito ->
+        perfilViewModel.resultadoCamara(exito)
+    }
+
+    // Pide el permiso de cámara; si lo concede, abre la cámara
+    val permisoCamaraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            camaraLauncher.launch(perfilViewModel.prepararFotoCamara())
+        } else {
+            Toast.makeText(context, "Sin permiso de cámara no se puede tomar la foto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Abre la galería para elegir una imagen; la Uri elegida va al ViewModel
+    val galeriaLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        perfilViewModel.resultadoGaleria(uri)
+    }
 
     Scaffold(
         topBar = {
@@ -60,6 +97,40 @@ fun PerfilScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+
+            // ----- Foto del perfil (cámara y galería) -----
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ImagenInteligente(uri = fotoUri)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            // Si ya tiene permiso abre la cámara; si no, lo pide
+                            val tienePermiso = ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED
+                            if (tienePermiso) {
+                                camaraLauncher.launch(perfilViewModel.prepararFotoCamara())
+                            } else {
+                                permisoCamaraLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        }) { Text("Cámara") }
+                        OutlinedButton(onClick = { galeriaLauncher.launch("image/*") }) {
+                            Text("Galería")
+                        }
+                    }
+                    if (fotoUri != null) {
+                        TextButton(onClick = { perfilViewModel.quitarFoto() }) {
+                            Text("Quitar foto")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
+                }
+            }
 
             // ----- Formulario del perfil ficticio -----
             item {
