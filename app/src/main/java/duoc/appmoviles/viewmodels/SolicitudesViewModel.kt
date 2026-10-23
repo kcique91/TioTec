@@ -81,4 +81,4 @@ class SolicitudesViewModel(application: Application) : AndroidViewModel(applicat
             solicitudDao.eliminar(id)
         }
     }
-}
+}
