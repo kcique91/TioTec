@@ -34,7 +34,7 @@ ver qué le falta mejorar y llevar un checklist de las acciones que tiene pendie
 - Solicitudes de asistencia simuladas.
 - Formularios de registro, perfil, dispositivos y solicitudes con validaciones, mensajes de error e íconos por campo.
 Recursos nativos: notificaciones y cámara/galería.
-- - Animaciones en el checklist (color de las tarjetas y barra de progreso) y en la foto de perfil.
+- Animaciones en el checklist (color de las tarjetas y barra de progreso) y en la foto de perfil.
 
 ## Estructura
 
