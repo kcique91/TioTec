@@ -5,5 +5,6 @@ data class Accion(
     val id: Int,                    // mismo id de la pregunta que la originó
     val categoria: Categoria,
     val texto: String,              // la recomendación a realizar
-    val completada: Boolean = false // false = pendiente, true = completada
+    val completada: Boolean = false, // false = pendiente, true = completada
+    val prioridad: Prioridad = Prioridad.MEDIA // qué tan urgente es hacerla
 )

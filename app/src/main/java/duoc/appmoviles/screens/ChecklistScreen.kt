@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import duoc.appmoviles.navigation.Screen
+import duoc.appmoviles.model.Prioridad
 import duoc.appmoviles.notifications.Recordatorios
 import duoc.appmoviles.viewmodels.ChecklistViewModel
 import duoc.appmoviles.viewmodels.EvaluacionViewModel
@@ -174,6 +175,16 @@ fun ChecklistScreen(
                                     Text(
                                         text = if (accion.completada) "Completada" else "Pendiente",
                                         style = MaterialTheme.typography.labelMedium
+                                    )
+                                    // Prioridad: la Alta pendiente se destaca en color de alerta
+                                    Text(
+                                        text = "Prioridad: ${accion.prioridad.titulo}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (accion.prioridad == Prioridad.ALTA && !accion.completada)
+                                            MaterialTheme.colorScheme.error
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
