@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.data.AccionEntity
 import duoc.appmoviles.data.AppDatabase
 import duoc.appmoviles.model.Accion
+import duoc.appmoviles.model.BancoPreguntas
+import duoc.appmoviles.model.Prioridad
 import duoc.appmoviles.model.Categoria
 import duoc.appmoviles.model.Pregunta
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,14 +26,23 @@ class ChecklistViewModel(application: Application) : AndroidViewModel(applicatio
     // se convierte en una Accion, que es la que usa la pantalla.
     val acciones: StateFlow<List<Accion>> = dao.obtenerTodas()
         .map { filas ->
-            filas.map {
+            filas.map { fila ->
+                // La acción tiene el mismo id que la pregunta que la originó:
+                // con ese id se busca la prioridad en el banco de preguntas
+                val prioridad = BancoPreguntas.preguntas
+                    .find { it.id == fila.id }?.prioridad ?: Prioridad.MEDIA
+
                 Accion(
-                    id = it.id,
-                    categoria = Categoria.valueOf(it.categoria),
-                    texto = it.texto,
-                    completada = it.completada
+                    id = fila.id,
+                    categoria = Categoria.valueOf(fila.categoria),
+                    texto = fila.texto,
+                    completada = fila.completada,
+                    prioridad = prioridad
                 )
             }
+                // Orden: primero las pendientes, y dentro de cada grupo
+                // las de prioridad Alta antes que las Media y las Baja
+                .sortedWith(compareBy({ it.completada }, { it.prioridad.orden }))
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
