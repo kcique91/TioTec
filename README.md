@@ -60,3 +60,10 @@ app/src/main/java/duoc/appmoviles/
 4. Darle a Run.
 
 Todos los datos de la app son ficticios.
+
+
+## Checklist priorizado
+Cada pregunta tiene prioridad Alta, Media o Baja. El checklist muestra primero las pendientes más importantes, deja las completadas al final y muestra la prioridad en cada tarjeta.
+
+## Planificación
+Tablero de Trello: https://trello.com/b/rR3gBaMs/tiotec
