@@ -34,6 +34,8 @@ import duoc.appmoviles.screens.RegistroScreen
 import duoc.appmoviles.screens.ResumenScreen
 import duoc.appmoviles.viewmodels.UsuarioViewModel
 import duoc.appmoviles.viewmodels.ConsejosViewModel
+import duoc.appmoviles.screens.PostScreen
+import duoc.appmoviles.viewmodels.PostViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
@@ -49,6 +51,7 @@ class MainActivity : ComponentActivity() {
                 val checklistViewModel: ChecklistViewModel = viewModel()
                 val consejosViewModel: ConsejosViewModel = viewModel()
                 val usuarioViewModel: UsuarioViewModel = viewModel()
+                val postViewModel: PostViewModel = viewModel()
                 val navController = rememberNavController()
 
                 // Ruta de la pantalla que se está mostrando (para marcar la opción activa)
@@ -143,6 +146,12 @@ class MainActivity : ComponentActivity() {
                             ResumenScreen(
                                 viewModel = viewModel,
                                 usuarioViewModel = usuarioViewModel
+                            )
+                        }
+                        composable(route = Screen.Posts.route) {
+                            PostScreen(
+                                viewModel = postViewModel,
+                                onVolver = { viewModel.navigateBack() }
                             )
                         }
                     }
