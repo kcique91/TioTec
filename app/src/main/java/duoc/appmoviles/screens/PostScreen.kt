@@ -5,11 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import duoc.appmoviles.model.Post
 import duoc.appmoviles.viewmodels.PostViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,6 +24,20 @@ fun PostScreen(
     val posts by viewModel.postList.collectAsState()
     val cargando by viewModel.cargando.collectAsState()
     val error by viewModel.error.collectAsState()
+    val mensaje by viewModel.mensaje.collectAsState()
+
+    // Estado de la ventana de crear o editar
+    var mostrarDialogo by remember { mutableStateOf(false) }
+    var postEditando by remember { mutableStateOf<Post?>(null) } // null = creando uno nuevo
+
+    // Para mostrar mensajes cortos abajo
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(mensaje) {
+        mensaje?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.mensajeMostrado()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -36,6 +52,16 @@ fun PostScreen(
                     }
                 }
             )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            // Botón "+" para crear una publicación (POST)
+            FloatingActionButton(onClick = {
+                postEditando = null
+                mostrarDialogo = true
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Crear publicación")
+            }
         }
     ) { innerPadding ->
         Box(
@@ -86,6 +112,20 @@ fun PostScreen(
                                     text = post.body,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    // PUT: abre la ventana con los datos de este post
+                                    TextButton(onClick = {
+                                        postEditando = post
+                                        mostrarDialogo = true
+                                    }) { Text("Editar") }
+                                    // DELETE: elimina este post
+                                    TextButton(onClick = { viewModel.eliminarPost(post) }) {
+                                        Text("Eliminar")
+                                    }
+                                }
                             }
                         }
                     }
@@ -93,4 +133,70 @@ fun PostScreen(
             }
         }
     }
+
+    // Ventana para crear (POST) o editar (PUT)
+    if (mostrarDialogo) {
+        FormularioPostDialog(
+            esEdicion = postEditando != null,
+            tituloInicial = postEditando?.title ?: "",
+            contenidoInicial = postEditando?.body ?: "",
+            onGuardar = { titulo, contenido ->
+                val editando = postEditando
+                if (editando == null) {
+                    viewModel.crearPost(titulo, contenido)
+                } else {
+                    viewModel.actualizarPost(editando, titulo, contenido)
+                }
+                mostrarDialogo = false
+            },
+            onCancelar = { mostrarDialogo = false }
+        )
+    }
+}
+
+// Ventana con dos campos de texto; sirve para crear y para editar
+@Composable
+private fun FormularioPostDialog(
+    esEdicion: Boolean,
+    tituloInicial: String,
+    contenidoInicial: String,
+    onGuardar: (String, String) -> Unit,
+    onCancelar: () -> Unit
+) {
+    var titulo by remember { mutableStateOf(tituloInicial) }
+    var contenido by remember { mutableStateOf(contenidoInicial) }
+
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = {
+            Text(if (esEdicion) "Editar publicación (PUT)" else "Nueva publicación (POST)")
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = titulo,
+                    onValueChange = { titulo = it },
+                    label = { Text("Título") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = contenido,
+                    onValueChange = { contenido = it },
+                    label = { Text("Contenido") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            // El botón se activa solo si los dos campos tienen texto
+            Button(
+                onClick = { onGuardar(titulo, contenido) },
+                enabled = titulo.isNotBlank() && contenido.isNotBlank()
+            ) { Text("Guardar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) { Text("Cancelar") }
+        }
+    )
 }
