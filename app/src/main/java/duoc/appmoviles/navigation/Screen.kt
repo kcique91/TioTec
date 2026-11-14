@@ -29,5 +29,8 @@ sealed class Screen(val route: String) {
 
     // Resumen de los datos registrados
     data object Resumen : Screen("resumen_page")
+
+    // Publicaciones de una API de prueba (Guía 14)
+    data object Posts : Screen("posts_page")
 }
 

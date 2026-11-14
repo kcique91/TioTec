@@ -33,7 +33,8 @@ fun HomeScreen(
         "Perfil" to Screen.Profile,
         "Consejos" to Screen.Consejos,
         "Solicitudes" to Screen.Solicitudes,
-        "Registro" to Screen.Registro
+        "Registro" to Screen.Registro,
+        "Publicaciones" to Screen.Posts
 
     )
 
