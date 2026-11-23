@@ -65,4 +65,16 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+    // Pruebas unitarias (Guía 15): Kotest para la lógica, MockK para simular dependencias
+    // y coroutines-test para controlar las corrutinas de los ViewModel
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.mockk:mockk:1.14.5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+}
+
+// Obligatorio para usar JUnit 5 (Kotest corre sobre JUnit 5)
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
