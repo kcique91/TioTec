@@ -10,3 +10,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Gson arma los objetos por reflexión: en el APK release no se deben renombrar
+# ni quitar los campos de los modelos que llegan por la red.
+-keep class duoc.appmoviles.model.** { *; }
