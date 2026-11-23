@@ -6,9 +6,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.data.AppDatabase
-import duoc.appmoviles.data.DispositivoEntity
 import duoc.appmoviles.data.PerfilEntity
-import duoc.appmoviles.model.DispositivoFormState
 import duoc.appmoviles.model.PerfilFormState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,17 +21,12 @@ import java.io.File
 
 class PerfilViewModel(application: Application) : AndroidViewModel(application) {
 
-    // DAOs del perfil y de los dispositivos
+    // DAO del perfil (los dispositivos ahora viven en el microservicio ms-dispositivos)
     private val perfilDao = AppDatabase.obtener(application).perfilDao()
-    private val dispositivoDao = AppDatabase.obtener(application).dispositivoDao()
 
     // Perfil guardado (null si todavía no se ha creado)
     val perfil: StateFlow<PerfilEntity?> = perfilDao.obtener()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    // Dispositivos de prueba guardados
-    val dispositivos: StateFlow<List<DispositivoEntity>> = dispositivoDao.obtenerTodos()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // ----- Foto del perfil (cámara y galería) -----
 
@@ -105,15 +98,11 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         return ultima?.let { Uri.fromFile(it) }
     }
 
-    // ----- Formularios de perfil y dispositivo (estado y validación) -----
+    // ----- Formulario del perfil (estado y validación) -----
 
     // Estado del formulario del perfil: privado para modificar, público solo lectura
     private val _formPerfil = MutableStateFlow(PerfilFormState())
     val formPerfil: StateFlow<PerfilFormState> = _formPerfil.asStateFlow()
-
-    // Estado del formulario de dispositivos
-    private val _formDispositivo = MutableStateFlow(DispositivoFormState())
-    val formDispositivo: StateFlow<DispositivoFormState> = _formDispositivo.asStateFlow()
 
     init {
         // Si ya hay un perfil guardado, se rellena el formulario con sus datos
@@ -134,16 +123,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         _formPerfil.update { it.copy(nivel = valor) }
     }
 
-    // Actualiza el nombre del dispositivo y limpia su error
-    fun onNombreDispositivoChange(valor: String) {
-        _formDispositivo.update { it.copy(nombre = valor, errorNombre = null) }
-    }
-
-    // Actualiza el sistema operativo y limpia su error
-    fun onSistemaDispositivoChange(valor: String) {
-        _formDispositivo.update { it.copy(sistema = valor, errorSistema = null) }
-    }
-
     // Valida el perfil; si está correcto lo guarda en Room. Devuelve true si se guardó
     fun guardarPerfil(): Boolean {
         val form = _formPerfil.value
@@ -159,29 +138,5 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
             perfilDao.guardar(PerfilEntity(nombre = form.nombre.trim(), nivel = form.nivel))
         }
         return true
-    }
-
-    // Valida el dispositivo; si está correcto lo guarda y limpia el formulario
-    fun agregarDispositivo(): Boolean {
-        val form = _formDispositivo.value
-        val errorNombre = if (form.nombre.isBlank()) "Campo obligatorio" else null
-        val errorSistema = if (form.sistema.isBlank()) "Campo obligatorio" else null
-        _formDispositivo.update { it.copy(errorNombre = errorNombre, errorSistema = errorSistema) }
-        if (errorNombre != null || errorSistema != null) return false
-
-        viewModelScope.launch {
-            dispositivoDao.insertar(
-                DispositivoEntity(nombre = form.nombre.trim(), sistema = form.sistema.trim())
-            )
-        }
-        _formDispositivo.value = DispositivoFormState()
-        return true
-    }
-
-    // Elimina un dispositivo
-    fun eliminarDispositivo(id: Int) {
-        viewModelScope.launch {
-            dispositivoDao.eliminar(id)
-        }
     }
 }
