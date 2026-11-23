@@ -32,6 +32,7 @@ fun HomeScreen(
         "Historial" to Screen.History,
         "Perfil" to Screen.Profile,
         "Consejos" to Screen.Consejos,
+        "Soporte de Android" to Screen.Versiones,
         "Solicitudes" to Screen.Solicitudes,
         "Registro" to Screen.Registro,
         "Publicaciones" to Screen.Posts

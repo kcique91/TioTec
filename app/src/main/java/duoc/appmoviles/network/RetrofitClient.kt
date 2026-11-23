@@ -11,6 +11,9 @@ object RetrofitClient {
     // API de publicaciones de prueba (Guía 14)
     private const val POSTS_BASE_URL = "https://jsonplaceholder.typicode.com/"
 
+    // API externa: fechas de soporte de las versiones de Android
+    private const val ENDOFLIFE_BASE_URL = "https://endoflife.date/"
+
     // Microservicios propios (Spring Boot). 10.0.2.2 es el computador visto desde el emulador.
     private const val SOLICITUDES_BASE_URL = "http://10.0.2.2:8081/"
     private const val DISPOSITIVOS_BASE_URL = "http://10.0.2.2:8082/"
@@ -40,5 +43,10 @@ object RetrofitClient {
     // Microservicio de dispositivos de prueba
     val dispositivosApi: DispositivoApiService by lazy {
         crear(DISPOSITIVOS_BASE_URL).create(DispositivoApiService::class.java)
+    }
+
+    // API externa endoflife.date
+    val endOfLifeApi: EndOfLifeApiService by lazy {
+        crear(ENDOFLIFE_BASE_URL).create(EndOfLifeApiService::class.java)
     }
 }

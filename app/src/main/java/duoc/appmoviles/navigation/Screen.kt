@@ -32,5 +32,7 @@ sealed class Screen(val route: String) {
 
     // Publicaciones de una API de prueba (Guía 14)
     data object Posts : Screen("posts_page")
-}
 
+    // Soporte de seguridad de cada versión de Android (API externa endoflife.date)
+    data object Versiones : Screen("versiones_page")
+}
