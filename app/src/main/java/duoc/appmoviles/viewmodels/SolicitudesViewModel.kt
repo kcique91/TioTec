@@ -1,5 +1,6 @@
 package duoc.appmoviles.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.model.Solicitud
@@ -47,6 +48,7 @@ class SolicitudesViewModel(
             try {
                 _solicitudes.value = repository.listar()
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Solicitudes", e)
                 _error.value = "No se pudo conectar con el microservicio de solicitudes. Revisa que esté encendido."
             } finally {
                 _cargando.value = false
@@ -88,6 +90,7 @@ class SolicitudesViewModel(
                 _form.update { it.copy(descripcion = "") }
                 _error.value = null
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Solicitudes", e)
                 _error.value = "No se pudo crear la solicitud"
             }
         }
@@ -110,6 +113,7 @@ class SolicitudesViewModel(
                     if (it.id == actualizada.id) actualizada else it
                 }
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Solicitudes", e)
                 _error.value = "No se pudo actualizar la solicitud"
             }
         }
@@ -126,6 +130,7 @@ class SolicitudesViewModel(
                     _error.value = "No se pudo eliminar la solicitud"
                 }
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Solicitudes", e)
                 _error.value = "No se pudo eliminar la solicitud"
             }
         }

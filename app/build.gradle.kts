@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "duoc.appmoviles"
         minSdk = 24
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -34,6 +34,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    testOptions {
+        // En las pruebas unitarias, las clases de Android (como Log) devuelven valores vacíos
+        unitTests.isReturnDefaultValues = true
     }
 }
 

@@ -1,5 +1,6 @@
 package duoc.appmoviles.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.model.VersionAndroid
@@ -45,6 +46,7 @@ class VersionesViewModel(
             try {
                 _versiones.value = repository.obtenerVersiones()
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Versiones", e)
                 _error.value = "No se pudo consultar el soporte de Android. Revisa tu conexión a internet."
             } finally {
                 _cargando.value = false
