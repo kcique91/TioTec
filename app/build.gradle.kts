@@ -81,4 +81,12 @@ dependencies {
 // Obligatorio para usar JUnit 5 (Kotest corre sobre JUnit 5)
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // MockK (Byte Buddy) todavía no reconoce Java 25: se habilita su modo experimental
+    jvmArgs("-Dnet.bytebuddy.experimental=true", "-XX:+EnableDynamicAgentLoading")
+    // Kotest no necesita buscar extensiones en todo el proyecto
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    // Muestra en la consola el nombre de cada prueba y si pasó o falló
+    testLogging {
+        events("passed", "failed", "skipped")
+    }
 }
