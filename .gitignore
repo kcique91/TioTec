@@ -22,3 +22,5 @@ backend/**/target/
 backend/**/data/
 backend/**/.idea/
 Claude outputs/
+# Salida del asistente "Generate Signed APK" (el APK entregado está en apk/)
+app/release/

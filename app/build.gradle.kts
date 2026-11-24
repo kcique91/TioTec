@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -20,10 +22,28 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Firma del APK release con la llave keystore/tiotec-release.jks
+    signingConfigs {
+        create("release") {
+            val propiedades = Properties()
+            val archivo = rootProject.file("keystore/keystore.properties")
+            if (archivo.exists()) {
+                archivo.inputStream().use { propiedades.load(it) }
+                storeFile = rootProject.file("keystore/" + propiedades.getProperty("storeFile"))
+                storePassword = propiedades.getProperty("storePassword")
+                keyAlias = propiedades.getProperty("keyAlias")
+                keyPassword = propiedades.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+            // Sin optimización (R8): al recortar el código rompía la lectura del JSON
+            // de las APIs (Gson/Retrofit) y la app se cerraba al abrir
             optimization {
-                enable = true
+                enable = false
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
