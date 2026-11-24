@@ -1,5 +1,6 @@
 package duoc.appmoviles.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import duoc.appmoviles.model.Dispositivo
@@ -47,6 +48,7 @@ class DispositivosViewModel(
             try {
                 _dispositivos.value = repository.listar()
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Dispositivos", e)
                 _error.value = "No se pudo conectar con el microservicio de dispositivos. Revisa que esté encendido."
             } finally {
                 _cargando.value = false
@@ -81,6 +83,7 @@ class DispositivosViewModel(
                 _formDispositivo.value = DispositivoFormState()
                 _error.value = null
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Dispositivos", e)
                 _error.value = "No se pudo registrar el dispositivo"
             }
         }
@@ -98,6 +101,7 @@ class DispositivosViewModel(
                     _error.value = "No se pudo eliminar el dispositivo"
                 }
             } catch (e: Exception) {
+                Log.e("TioTec", "Error en Dispositivos", e)
                 _error.value = "No se pudo eliminar el dispositivo"
             }
         }

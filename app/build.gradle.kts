@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "duoc.appmoviles"
         minSdk = 24
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -34,6 +34,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    testOptions {
+        // En las pruebas unitarias, las clases de Android (como Log) devuelven valores vacíos
+        unitTests.isReturnDefaultValues = true
     }
 }
 
@@ -65,4 +69,24 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+    // Pruebas unitarias (Guía 15): Kotest para la lógica, MockK para simular dependencias
+    // y coroutines-test para controlar las corrutinas de los ViewModel
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.mockk:mockk:1.14.5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+}
+
+// Obligatorio para usar JUnit 5 (Kotest corre sobre JUnit 5)
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    // MockK (Byte Buddy) todavía no reconoce Java 25: se habilita su modo experimental
+    jvmArgs("-Dnet.bytebuddy.experimental=true", "-XX:+EnableDynamicAgentLoading")
+    // Kotest no necesita buscar extensiones en todo el proyecto
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    // Muestra en la consola el nombre de cada prueba y si pasó o falló
+    testLogging {
+        events("passed", "failed", "skipped")
+    }
 }
