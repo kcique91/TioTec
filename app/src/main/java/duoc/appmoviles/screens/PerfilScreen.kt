@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import duoc.appmoviles.components.ImagenInteligente
+import duoc.appmoviles.viewmodels.DispositivosViewModel
 import duoc.appmoviles.viewmodels.MainViewModel
 import duoc.appmoviles.viewmodels.PerfilViewModel
 
@@ -31,15 +32,19 @@ import duoc.appmoviles.viewmodels.PerfilViewModel
 @Composable
 fun PerfilScreen(
     viewModel: MainViewModel,
-    perfilViewModel: PerfilViewModel = viewModel()
+    perfilViewModel: PerfilViewModel = viewModel(),
+    dispositivosViewModel: DispositivosViewModel = viewModel()
 ) {
-    // Datos guardados en la base de datos (se actualizan solos)
+    // Perfil guardado en Room (se actualiza solo)
     val perfil by perfilViewModel.perfil.collectAsState()
-    val dispositivos by perfilViewModel.dispositivos.collectAsState()
+
+    // Dispositivos que llegan desde el microservicio ms-dispositivos
+    val dispositivos by dispositivosViewModel.dispositivos.collectAsState()
+    val errorDispositivos by dispositivosViewModel.error.collectAsState()
 
     // Estado de los formularios (lo que se escribe y sus errores) vive en el ViewModel
     val formPerfil by perfilViewModel.formPerfil.collectAsState()
-    val formDispositivo by perfilViewModel.formDispositivo.collectAsState()
+    val formDispositivo by dispositivosViewModel.formDispositivo.collectAsState()
 
     val niveles = listOf("Básico", "Intermedio", "Avanzado")
 
@@ -196,7 +201,7 @@ fun PerfilScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = formDispositivo.nombre,
-                    onValueChange = perfilViewModel::onNombreDispositivoChange,
+                    onValueChange = dispositivosViewModel::onNombreDispositivoChange,
                     label = { Text("Nombre del dispositivo") },
                     leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
                     trailingIcon = {
@@ -217,7 +222,7 @@ fun PerfilScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = formDispositivo.sistema,
-                    onValueChange = perfilViewModel::onSistemaDispositivoChange,
+                    onValueChange = dispositivosViewModel::onSistemaDispositivoChange,
                     label = { Text("Sistema operativo (ej: Android 14)") },
                     leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     trailingIcon = {
@@ -237,9 +242,16 @@ fun PerfilScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { perfilViewModel.agregarDispositivo() },
+                    onClick = { dispositivosViewModel.agregarDispositivo() },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Agregar dispositivo") }
+                // Si el microservicio no responde, se avisa y se puede reintentar
+                errorDispositivos?.let { mensaje ->
+                    Text(text = mensaje, color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = { dispositivosViewModel.cargarDispositivos() }) {
+                        Text("Reintentar")
+                    }
+                }
             }
 
             // ----- Lista de dispositivos registrados -----
@@ -263,7 +275,7 @@ fun PerfilScreen(
                                 Text(dispositivo.sistema)
                             }
                             TextButton(
-                                onClick = { perfilViewModel.eliminarDispositivo(dispositivo.id) }
+                                onClick = { dispositivosViewModel.eliminarDispositivo(dispositivo) }
                             ) { Text("Eliminar") }
                         }
                     }

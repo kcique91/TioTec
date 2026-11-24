@@ -8,9 +8,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,8 +29,10 @@ fun SolicitudesScreen(
     viewModel: MainViewModel,
     solicitudesViewModel: SolicitudesViewModel = viewModel()
 ) {
-    // Solicitudes guardadas en la base de datos (se actualizan solas)
+    // Datos que llegan desde el microservicio ms-solicitudes
     val solicitudes by solicitudesViewModel.solicitudes.collectAsState()
+    val cargando by solicitudesViewModel.cargando.collectAsState()
+    val error by solicitudesViewModel.error.collectAsState()
 
     // Estado del formulario (categoría, descripción y error) vive en el ViewModel
     val form by solicitudesViewModel.form.collectAsState()
@@ -48,6 +52,12 @@ fun SolicitudesScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
+                    }
+                },
+                actions = {
+                    // Vuelve a pedir la lista al microservicio (GET)
+                    IconButton(onClick = { solicitudesViewModel.cargarSolicitudes() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Actualizar")
                     }
                 }
             )
@@ -69,7 +79,7 @@ fun SolicitudesScreen(
                     text = "Nueva solicitud",
                     style = MaterialTheme.typography.titleLarge
                 )
-                Text("Es una simulación: no se envía a ninguna persona real.")
+                Text("Se guarda en el microservicio de solicitudes.")
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Categoría")
                 // Fila con scroll horizontal por si las categorías no caben
@@ -114,8 +124,25 @@ fun SolicitudesScreen(
                 HorizontalDivider()
             }
 
+            // ----- Estado de la conexión con el microservicio -----
+            if (cargando) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+            error?.let { mensaje ->
+                item {
+                    Text(text = mensaje, color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = { solicitudesViewModel.cargarSolicitudes() }) {
+                        Text("Reintentar")
+                    }
+                }
+            }
+
             // ----- Lista de solicitudes -----
-            if (solicitudes.isEmpty()) {
+            if (solicitudes.isEmpty() && !cargando && error == null) {
                 item { Text("Aún no has creado solicitudes.") }
             } else {
                 items(solicitudes) { solicitud ->
@@ -125,10 +152,12 @@ fun SolicitudesScreen(
                                 text = solicitud.categoria,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                text = formatoFecha.format(Date(solicitud.fecha)),
-                                style = MaterialTheme.typography.labelMedium
-                            )
+                            solicitud.fecha?.let { fecha ->
+                                Text(
+                                    text = formatoFecha.format(Date(fecha)),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(solicitud.descripcion)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -137,13 +166,14 @@ fun SolicitudesScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                // Simula que la solicitud avanza; se desactiva al llegar a "Resuelta"
+                                // PUT: avanza el estado; se desactiva al llegar a "Resuelta"
                                 Button(
                                     onClick = { solicitudesViewModel.avanzarEstado(solicitud) },
                                     enabled = solicitud.estado != "Resuelta"
                                 ) { Text("Avanzar estado") }
+                                // DELETE: elimina la solicitud del microservicio
                                 TextButton(
-                                    onClick = { solicitudesViewModel.eliminarSolicitud(solicitud.id) }
+                                    onClick = { solicitudesViewModel.eliminarSolicitud(solicitud) }
                                 ) { Text("Eliminar") }
                             }
                         }
