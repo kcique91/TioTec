@@ -35,6 +35,7 @@ import duoc.appmoviles.screens.ResumenScreen
 import duoc.appmoviles.viewmodels.UsuarioViewModel
 import duoc.appmoviles.viewmodels.ConsejosViewModel
 import duoc.appmoviles.screens.PostScreen
+import duoc.appmoviles.screens.VersionesScreen
 import duoc.appmoviles.viewmodels.PostViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -147,6 +148,9 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 usuarioViewModel = usuarioViewModel
                             )
+                        }
+                        composable(route = Screen.Versiones.route) {
+                            VersionesScreen(viewModel = viewModel)
                         }
                         composable(route = Screen.Posts.route) {
                             PostScreen(
