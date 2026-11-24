@@ -40,8 +40,10 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Sin optimización (R8): al recortar el código rompía la lectura del JSON
+            // de las APIs (Gson/Retrofit) y la app se cerraba al abrir
             optimization {
-                enable = true
+                enable = false
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
